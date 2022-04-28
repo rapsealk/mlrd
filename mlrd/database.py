@@ -74,7 +74,11 @@ class Database:
         self._engine = create_engine(url)
 
     def initialize(self):
-        from mlrd.auth.models import User   # noqa: F401
+        from mlrd.artifact.domain import Artifact   # noqa: F401
+        from mlrd.auth.models import User           # noqa: F401
+        from mlrd.dataset.domain import Dataset     # noqa: F401
+        from mlrd.device.domain import Device       # noqa: F401
+        from mlrd.session.domain import Session     # noqa: F401
 
         Base.metadata.create_all(self.engine)
 

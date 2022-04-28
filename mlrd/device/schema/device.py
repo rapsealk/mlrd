@@ -1,16 +1,7 @@
+from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import Column, Integer, String
-
-from mlrd.database import Base
-from mlrd.models import MLRDBase, PrimaryKey, TimeStampMixin
-
-
-class Device(Base, TimeStampMixin):
-    id = Column(Integer, primary_key=True)
-    address = Column(String(15), nullable=False)
-    uuid = Column(String(32), unique=True)
-    total_global_memory = Column(Integer, nullable=False)
+from mlrd.models import MLRDBase, PrimaryKey
 
 
 class DeviceBase(MLRDBase):
@@ -28,6 +19,8 @@ class DeviceRead(DeviceBase):
     address: str
     uuid: str
     total_global_memory: int
+    created_at: datetime
+    last_modified_at: datetime
 
 
 class DeviceUpdate(DeviceBase):
