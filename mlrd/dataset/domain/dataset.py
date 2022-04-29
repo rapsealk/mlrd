@@ -8,6 +8,6 @@ class Dataset(Base, TimeStampMixin):
     id = Column(Integer, primary_key=True)
     uid = Column(ForeignKey("user.id"))
     display_name = Column(String(64))
-    object_name = Column(String(64), nullable=False)
-    etag = Column(String(64), nullable=False)
+    object_name = Column(String(36), nullable=False)
+    etag = Column(String(32), nullable=False)
     is_public = Column(Boolean, default=False, nullable=False)
