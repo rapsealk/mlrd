@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from mlrd.auth.views import router as auth_router
+from mlrd.auth.routers import router as auth_router
 from mlrd.dataset.routers import router as dataset_router
 
 router = APIRouter(prefix="/api")

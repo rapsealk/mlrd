@@ -1,6 +1,6 @@
 import os
 
-from setuptools import find_packages, setup
+from setuptools import setup
 
 ROOT_PATH = os.path.abspath(os.path.dirname(__file__))
 VERSION = "0.1.0"

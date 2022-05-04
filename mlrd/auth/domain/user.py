@@ -2,7 +2,7 @@ import bcrypt
 from sqlalchemy import Column, Integer, LargeBinary, String
 
 from mlrd.database import Base
-from mlrd.models import MLRDBase, PrimaryKey, TimeStampMixin
+from mlrd.models import TimeStampMixin
 
 
 class User(Base, TimeStampMixin):
@@ -14,31 +14,3 @@ class User(Base, TimeStampMixin):
 
     def check_password(self, password: str):
         return bcrypt.checkpw(password.encode("utf-8"), self.password)
-
-
-class UserBase(MLRDBase):
-    pass
-
-
-class UserCreate(UserBase):
-    name: str
-    username: str
-    email: str
-    password: str
-
-
-class UserRead(UserBase):
-    id: PrimaryKey
-    name: str
-    username: str
-    email: str
-
-
-class UserUpdate(UserBase):
-    id: PrimaryKey
-    username: str
-    password: str
-
-
-class UserDelete(UserBase):
-    id: PrimaryKey
