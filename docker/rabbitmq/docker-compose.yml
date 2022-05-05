@@ -1,0 +1,8 @@
+version: "3.7"
+services:
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.9.15-management-alpine
+    ports:
+      - 5671-5672:5671-5672
+      - 8080:15672
