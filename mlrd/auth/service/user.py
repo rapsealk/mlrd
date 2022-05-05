@@ -1,56 +1,49 @@
-from abc import ABC
+import abc
 from typing import Optional
 
 import bcrypt
 from sqlalchemy.orm import Session
 
 from mlrd.auth.domain import User
+from mlrd.auth.repositories import UserRepository
 from mlrd.auth.schema import UserCreate, UserUpdate, UserDelete
 
 
-class BaseUserService(ABC):
-    def hash_password(self, password: str, salt: Optional[str] = None):
-        salt = salt or bcrypt.gensalt()
+class BaseUserService(abc.ABC):
+    @abc.abstractmethod
+    async def signup(self, *, user_in: UserCreate) -> Optional[User]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    async def signin(self, *, email: str, password: str) -> Optional[User]:
+        raise NotImplementedError()
+
+    def hash_password(self, password: str) -> bytes:
+        salt = bcrypt.gensalt()
         return bcrypt.hashpw(password.encode("utf-8"), salt)
 
 
 class UserService(BaseUserService):
-    def __init__(self):
+    def __init__(self, session: Session):
         super(UserService, self).__init__()
+        self._repository = UserRepository(session=session)
 
-    async def create_user(self, *, db_session: Session, user_in: UserCreate, secret: Optional[str] = None) -> Optional[User]:
-        user_in.password = self.hash_password(user_in.password, salt=secret)
-        try:
-            user = User(**user_in.dict())
-            db_session.add(user)
-            db_session.commit()
-        except Exception:
+    async def signup(self, *, user_in: UserCreate) -> Optional[User]:
+        user_in.password = self.hash_password(password=user_in.password)
+        return await self._repository.create(user_in=user_in)
+
+    async def signin(self, *, email: str, password: str) -> Optional[User]:
+        if not (user := await self._repository.find(email=email)):
+            return None
+        if not user.check_password(password):
             return None
         return user
 
-    async def find_user(self, *, db_session: Session, **kwargs) -> Optional[User]:
-        if user_id := kwargs.get("id"):
-            return db_session.query(User).filter(User.id == user_id).first()
-        elif username := kwargs.get("username"):
-            return db_session.query(User).filter(User.username == username).first()
-        elif email := kwargs.get("email"):
-            return db_session.query(User).filter(User.email == email).first()
-        return None
+    async def search_by(self, **kwargs) -> Optional[User]:
+        return await self._repository.find(**kwargs)
 
-    async def update_user(self, *, db_session: Session, user_in: UserUpdate) -> Optional[User]:
-        if not (user := await self.find_user(db_session=db_session, id=user_in.id)):
-            return None
+    async def update(self, *, user_in: UserUpdate) -> Optional[User]:
+        return await self._repository.update(user_in=user_in)
 
-        new_data = user_in.dict(skip_defaults=True, exclude={"id"})
-
-        for field in user.dict():
-            if field in new_data:
-                setattr(user, field, new_data[field])
-
-        db_session.commit()
-
-        return user
-
-    async def delete_user(self, *, db_session: Session, user_in: UserDelete):
-        db_session.query(User).filter(User.id == user_in.id).delete()
-        db_session.commit()
+    async def delete(self, *, user_in: UserDelete) -> bool:
+        return await self._repository.delete(user_in=user_in)

@@ -45,6 +45,7 @@ class Error(BaseModel):
     code: int
     message: str
 
+
 class Response(GenericModel, Generic[DataT]):
     data: Optional[DataT]
     error: Optional[Error]
