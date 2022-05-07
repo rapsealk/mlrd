@@ -1,1 +1,1 @@
-from .dataset import MinioDatasetService    # noqa: F401
+from .dataset import DatasetService, MinioStorageService    # noqa: F401

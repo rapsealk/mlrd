@@ -8,17 +8,14 @@ import minio
 from mlrd.config import MINIO_ACCESS_KEY, MINIO_BUCKET_NAME, MINIO_ENDPOINT, MINIO_SECRET_KEY
 
 
-class BaseDatasetService(ABC):
-    def __init__(self):
-        pass
-
+class BaseStorageService(ABC):
     def presign(self):
         raise NotImplementedError()
 
 
-class MinioDatasetService(BaseDatasetService):
+class MinioStorageService(BaseStorageService):
     def __init__(self):
-        super(MinioDatasetService, self).__init__()
+        super(MinioStorageService, self).__init__()
 
     def presign(
         self,
@@ -40,3 +37,20 @@ class MinioDatasetService(BaseDatasetService):
         except ValueError:
             return None
         return url
+
+
+class BaseDatasetService(ABC):
+    def __init__(self):
+        pass
+
+    def presign(self) -> Optional[str]:
+        raise NotImplementedError()
+
+
+class DatasetService(BaseDatasetService):
+    def __init__(self, storage: BaseStorageService):
+        super(DatasetService, self).__init__()
+        self._storage = storage
+
+    def presign(self) -> Optional[str]:
+        return self._storage.presign()
