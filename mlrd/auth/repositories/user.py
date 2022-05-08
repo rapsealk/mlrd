@@ -25,7 +25,7 @@ class BaseUserRepository(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    async def delete(self, user_in: UserDelete) -> Optional[User]:
+    async def delete(self, user_in: UserDelete) -> bool:
         raise NotImplementedError()
 
 

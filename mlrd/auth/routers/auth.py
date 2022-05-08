@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from mlrd.database import get_db
 from mlrd.auth.schema.user import UserCreate, UserRead
 from mlrd.auth.service import UserService
+from mlrd.auth.tasks import publish_user_signup_event
 
 router = APIRouter()
 
@@ -13,11 +14,13 @@ router = APIRouter()
 @router.post("/signup", response_model=UserRead)
 async def signup_user(
     user_in: UserCreate,
+    background_tasks: BackgroundTasks,
     db_session: Session = Depends(get_db)
 ):
     service = UserService(session=db_session)
     try:
         user = await service.signup(user_in=user_in)
+        background_tasks.add_task(publish_user_signup_event, routing_key="", user=user)
         return user
     except IntegrityError as e:
         raise HTTPException(
